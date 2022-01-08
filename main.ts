@@ -4,6 +4,12 @@ function append_ComHis (value: number) {
 function getDelta_ComHis () {
     return cHistory.getDelta(1)
 }
+input.onButtonPressed(Button.B, function () {
+    reset_ComHis()
+})
+function reset_ComHis () {
+    cHistory.clearFront();
+}
 let tmp: number;
 tmp = -100
 let compass: number;
@@ -19,7 +25,7 @@ class LimitedFront {
     }
     append(value: number) {
         if (this.front.length >= this.maxEntries) {
-            this.front.splice(0, this.maxEntries - this.front.length);
+            this.front.splice(0, this.front.length - this.maxEntries +1);
         }
         this.front.push(value);
     }
@@ -33,18 +39,24 @@ class LimitedFront {
     }
     getFromRow() {
         if (this.front.length > 0) {
-            return this.front.slice();
+            return this.front.slice(0,1);
         }
         return -100;
     }
     getLength() {
         return this.front.length;
     }
-    clear() {
+    clearFront() {
         this.front = [];
     }
+    getHistory() {
+        return this.front
+    }
 }
-let cHistory = new LimitedFront(10);
+let cHistory = new LimitedFront(100);
+loops.everyInterval(1000, function () {
+	
+})
 loops.everyInterval(500, function () {
     tmp = getDelta_ComHis()
     if (tmp < 0) {
@@ -55,11 +67,11 @@ loops.everyInterval(500, function () {
         serial.writeValue("L", cHistory.getLength())
     }
 })
-basic.forever(function () {
-	
-})
-loops.everyInterval(100, function () {
+loops.everyInterval(25, function () {
     compass = input.compassHeading()
     append_ComHis(compass)
     serial.writeValue("c", compass)
+})
+basic.forever(function () {
+	
 })
