@@ -1,12 +1,35 @@
 function append_ComHis (value: number) {
     cHistory.append(value);
 }
+function compassTick (angle: number) {
+    compass = angle
+    append_ComHis(compass)
+    serial.writeValue("c", compass)
+}
 function getDelta_ComHis () {
     return cHistory.getDelta(1)
+}
+function compassDelta () {
+    tmp = getDelta_ComHis()
+    if (tmp < 0) {
+        serial.writeString(" ERR " + '\n')
+    } else {
+        delta = tmp
+        serial.writeValue("D", delta)
+        serial.writeValue("L", cHistory.getLength())
+    }
 }
 input.onButtonPressed(Button.B, function () {
     reset_ComHis()
 })
+function debugCorrection () {
+    console.log(cHistory.getHistory())
+serial.writeValue("L", cHistory.getLength())
+    for (let i = 0; i <= cHistory.getKnownAngles().length - 1; i++) {
+        tmp = cHistory.getKnownAngles()[i]
+        console.log(tmp +" [" + cHistory.getCorrection()[tmp][0] + "]");
+    }
+}
 function reset_ComHis () {
     cHistory.reset();
 }
@@ -29,7 +52,7 @@ class CorrectionMap {
         this.reset();
     }
     private isNewAngle(angle: number) {
-        return ! (this.angleList.indexOf(angle) >= 0)
+        return (this.angleList.indexOf(angle) < 0)
     }
     addAngle(angle: number) {        
         if (this.isNewAngle(angle)) {
@@ -39,14 +62,33 @@ class CorrectionMap {
         }
         this.map[angle][0] = this.map[angle][0] + 1;
     }
+    private xxx(item: number[], index: number) {
+
+    }
     removeAngle(angle: number) {
-        if (this.isNewAngle(angle)) 
+        console.log("removeAngle("+angle+")")
+        if (this.isNewAngle(angle)) {
+            console.log("remAngle> new angle - this should not happen")
             return false;
-        if (this.map[angle][0] < 1) {
-            this.map[angle] = []
-            return true;
-        } 
+        }            
+
+        console.log("remAngle("+ angle +")> subtrackt angle");
         this.map[angle][0] = this.map[angle][0] - 1;
+        try {    
+            if (this.map[angle][0] == 0) {
+                console.log("remAngle> final cleanup");
+                //this.map.splice(angle-1, 1)
+                /*this.map.forEach(function (value: number[], index: number) {
+                    tmp = NaN;
+                    if ( (!! this.map[index]) && this.map[index][0] !== NaN) {
+                        tmp = this.map[index][0]
+                    }
+                    console.log("check> [" + index + "]:" + (isNaN(tmp) ? "" : tmp))
+                })*/
+            }
+        } catch (error) {
+            console.log(error)
+        }
         return true;
     }
     removeAngleHistory(angle: number) {
@@ -78,9 +120,9 @@ class CompassHistory {
         this.correction = new CorrectionMap(10, 20);
     }
     append(angle: number) {
-        if (this.history.length >= this.maxEntries) {
-            this.history.splice(0, this.history.length - this.maxEntries +1);
-            this.correction.removeAngle(angle);
+        if (this.history.length == this.maxEntries) {
+            this.correction.removeAngle(this.history[0]);
+            this.history.splice(0, this.history.length - this.maxEntries +1);                        
         }
         this.history.push(angle);
         this.correction.addAngle(angle);
@@ -116,30 +158,11 @@ class CompassHistory {
         return this.correction.getKnownAngles();
     }
 }
-let cHistory = new CompassHistory(100);
-loops.everyInterval(1000, function () {
-    tmp = getDelta_ComHis()
-    if (tmp < 0) {
-        serial.writeString(" ERR " + '\n')
-    } else {
-        delta = tmp
-        serial.writeValue("D", delta)
-        serial.writeValue("L", cHistory.getLength())
-    }
+let cHistory = new CompassHistory(10);
+loops.everyInterval(2000, function () {
+    compassTick(input.compassHeading())
+    debugCorrection()
 })
-loops.everyInterval(1000, function () {
-    compass = input.compassHeading()
-    append_ComHis(compass)
-    serial.writeValue("c", compass)
-})
-loops.everyInterval(1000, function () {
-    console.log(cHistory.getHistory())
-    
-    for (let i = 0; i < cHistory.getKnownAngles().length; i++) {
-        tmp = cHistory.getKnownAngles()[i]
-        console.log(tmp +" [" + cHistory.getCorrection()[tmp][0] + "]");
-    }    
-})
-basic.forever(function () {
+loops.everyInterval(2000, function () {
 	
 })
