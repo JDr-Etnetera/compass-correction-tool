@@ -20,12 +20,21 @@ class CorrectionMap {
     private maxKeys: number;
     private maxInRow: number;
     private map: number[][]; // angle index - values count
+    private angleList: number[];
     constructor(keys: number, inRow: number) {
         this.maxKeys = keys;
         this.maxInRow = inRow;        
-        this.map = [];
+        this.reset();
+    }
+    private isNewAngle(angle: number) {
+        return ! (this.angleList.indexOf(angle) >= 0)
     }
     addAngle(angle: number) {
+        if (this.isNewAngle(angle)) {
+            this.map[angle] = [];
+            this.map[angle][0] = 0;
+            this.angleList.push(angle);
+        }
         this.map[angle][0] = this.map[angle][0] + 1;
     }
     removeAngleHistory(angle: number) {
@@ -33,6 +42,7 @@ class CorrectionMap {
     }
     reset() {
         this.map = [];
+        this.angleList = [];
     }
     getAll() {
         return this.map;
