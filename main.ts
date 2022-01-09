@@ -47,6 +47,9 @@ class CorrectionMap {
     getAll() {
         return this.map;
     }
+    getKnownAngles() {
+        return this.angleList;
+    }
     /*
     for (var key in myArray) {
       console.log("key " + key + " has value " + myArray[key]);
@@ -96,12 +99,12 @@ class LimitedFront {
     getCorrection() {
         return this.correction.getAll();
     }
+    getKnownAngles() {
+        return this.correction.getKnownAngles();
+    }
 }
 let cHistory = new LimitedFront(100);
 loops.everyInterval(1000, function () {
-	
-})
-loops.everyInterval(500, function () {
     tmp = getDelta_ComHis()
     if (tmp < 0) {
         serial.writeString(" ERR " + '\n')
@@ -111,10 +114,18 @@ loops.everyInterval(500, function () {
         serial.writeValue("L", cHistory.getLength())
     }
 })
-loops.everyInterval(25, function () {
+loops.everyInterval(1000, function () {
     compass = input.compassHeading()
     append_ComHis(compass)
     serial.writeValue("c", compass)
+})
+loops.everyInterval(1000, function () {
+    console.log(cHistory.getHistory())
+    
+    for (let i = 0; i < cHistory.getKnownAngles().length; i++) {
+        tmp = cHistory.getKnownAngles()[i]
+        console.log(tmp +" [" + cHistory.getCorrection()[tmp][0] + "]");
+    }    
 })
 basic.forever(function () {
 	
