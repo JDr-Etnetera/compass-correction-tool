@@ -8,7 +8,7 @@ input.onButtonPressed(Button.B, function () {
     reset_ComHis()
 })
 function reset_ComHis () {
-    cHistory.clearFront();
+    cHistory.reset();
 }
 let tmp: number;
 tmp = -100
@@ -16,18 +16,48 @@ let compass: number;
 compass = 0
 let delta: number;
 delta = 0
+class CorrectionMap {
+    private maxKeys: number;
+    private maxInRow: number;
+    private map: number[][]; // angle index - values count
+    constructor(keys: number, inRow: number) {
+        this.maxKeys = keys;
+        this.maxInRow = inRow;        
+        this.map = [];
+    }
+    addAngle(angle: number) {
+        this.map[angle][0] = this.map[angle][0] + 1;
+    }
+    removeAngleHistory(angle: number) {
+        this.map[angle][0] = 0;
+    }
+    reset() {
+        this.map = [];
+    }
+    getAll() {
+        return this.map;
+    }
+    /*
+    for (var key in myArray) {
+      console.log("key " + key + " has value " + myArray[key]);
+    }
+    */ 
+}
 class LimitedFront {
     private maxEntries: number;
     private front: number[];
+    private correction: CorrectionMap;
     constructor(max: number) {
         this.front = [];
         this.maxEntries = max;
+        this.correction = new CorrectionMap(10, 20);
     }
     append(value: number) {
         if (this.front.length >= this.maxEntries) {
             this.front.splice(0, this.front.length - this.maxEntries +1);
         }
         this.front.push(value);
+        this.correction.addAngle(value);
     }
     getDelta(dec: number) {
         if (this.getLength() < 1) return -100;
@@ -46,11 +76,15 @@ class LimitedFront {
     getLength() {
         return this.front.length;
     }
-    clearFront() {
+    reset() {
         this.front = [];
+        this.correction.reset();
     }
     getHistory() {
         return this.front
+    }
+    getCorrection() {
+        return this.correction.getAll();
     }
 }
 let cHistory = new LimitedFront(100);
