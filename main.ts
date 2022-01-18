@@ -1,3 +1,13 @@
+function drive_20 () {
+    RingbitCar.freestyle(LEFT_HALF_SPD, RIGHT_HALF_SPD)
+    basic.pause(D020_HS_TIME)
+    RingbitCar.brake()
+}
+function drive_10 () {
+    RingbitCar.freestyle(LEFT_QUARTER_SPD, LEFT_QUARTER_SPD)
+    basic.pause(D010_QT_TIME)
+    RingbitCar.brake()
+}
 function append_ComHis (value: number) {
     cHistory.append(value);
 }
@@ -7,10 +17,24 @@ function compassTick (angle: number) {
     logValue("c", compass)
 }
 input.onButtonPressed(Button.A, function () {
-    turnCar(90)
+    basic.showString("A")
+    RingbitCar.freestyle(LEFT_HALF_SPD, RIGHT_HALF_SPD)
+    basic.pause(D010_HS_TIME)
+    RingbitCar.brake()
+    basic.clearScreen()
 })
+function drive_50 () {
+    RingbitCar.freestyle(LEFT_HALF_SPD, RIGHT_HALF_SPD)
+    basic.pause(D050_HS_TIME)
+    RingbitCar.brake()
+}
 function getDelta_ComHis () {
     return cHistory.getDelta(1)
+}
+function drive_100 () {
+    RingbitCar.freestyle(LEFT_HALF_SPD, RIGHT_HALF_SPD)
+    basic.pause(D100_HS_TIME)
+    RingbitCar.brake()
 }
 function turnCar (angle: number) {
     cHistory.fullCalibration();
@@ -49,8 +73,15 @@ function compassDelta () {
         logValue("L", cHistory.getLength())
     }
 }
+function drive (distance: number) {
+	
+}
 input.onButtonPressed(Button.B, function () {
-    reset_ComHis()
+    basic.showString("B")
+    RingbitCar.freestyle(LEFT_QUARTER_SPD, RIGHT_QUARTER_SPD)
+    basic.pause(D010_QT_TIME)
+    RingbitCar.brake()
+    basic.clearScreen()
 })
 function debugCorrection () {
     console.log(cHistory.getHistory())
@@ -67,21 +98,39 @@ let rightSpeed = 0
 let leftSpeed = 0
 let rotationTime = 0
 let direction = 0
+let ANGULAR_SPD = 0
 let RIGHT_ROTATION_SPD_MAX = 0
 let LEFT_ROTATION_SPD_MAX = 0
-let ANGULAR_SPD = 0
+let D010_QT_TIME = 0
+let D010_HS_TIME = 0
+let D020_HS_TIME = 0
+let D050_HS_TIME = 0
+let D100_HS_TIME = 0
+let RIGHT_QUARTER_SPD = 0
+let LEFT_QUARTER_SPD = 0
+let RIGHT_HALF_SPD = 0
+let LEFT_HALF_SPD = 0
 let SERIAL_LOGGING = false
 SERIAL_LOGGING = true
-// Turning speed of car [deg per ms]
-ANGULAR_SPD = 0.015
+LEFT_HALF_SPD = 50
+RIGHT_HALF_SPD = 46
+LEFT_QUARTER_SPD = 10
+RIGHT_QUARTER_SPD = 8
+D100_HS_TIME = 950
+D050_HS_TIME = 550
+D020_HS_TIME = 290
+D010_HS_TIME = 225
+D010_QT_TIME = 450
 // time between gathering compass data
 let COMPASS_TICK = 20
 // How large compass history is gathered
 let COMPASS_HISTORY = 100
 // Maximal speed of left wheel while rotating car
-LEFT_ROTATION_SPD_MAX = 75
+LEFT_ROTATION_SPD_MAX = 50
 // Maximal speed of right wheel while rotating car
-RIGHT_ROTATION_SPD_MAX = -75
+RIGHT_ROTATION_SPD_MAX = -45
+// Turning speed of car [deg per ms]
+ANGULAR_SPD = 0.075
 RingbitCar.init_wheel(AnalogPin.P1, AnalogPin.P2)
 let tmp: number;
 tmp = -100
@@ -247,8 +296,5 @@ class CompassHistory {
 }
 let cHistory = new CompassHistory(COMPASS_HISTORY, COMPASS_TICK);
 loops.everyInterval(500, function () {
-	
-})
-loops.everyInterval(5000, function () {
 	
 })
